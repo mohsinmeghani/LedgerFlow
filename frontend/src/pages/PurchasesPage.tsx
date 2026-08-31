@@ -188,6 +188,9 @@ export function PurchasesPage() {
                   <tr key={row.key}>
                     <td>
                       <select
+                        id={`line-item-${row.key}-item`}
+                        name={`line-item-${row.key}-item`}
+                        aria-label={`Item for line ${row.key + 1}`}
                         value={row.item_id}
                         onChange={(event) => updateRow(row.key, { item_id: event.target.value })}
                         required
@@ -204,6 +207,9 @@ export function PurchasesPage() {
                     </td>
                     <td>
                       <input
+                        id={`line-item-${row.key}-quantity`}
+                        name={`line-item-${row.key}-quantity`}
+                        aria-label={`Quantity for line ${row.key + 1}`}
                         type="number"
                         min="0"
                         step="0.001"
@@ -215,6 +221,9 @@ export function PurchasesPage() {
                     </td>
                     <td>
                       <input
+                        id={`line-item-${row.key}-rate`}
+                        name={`line-item-${row.key}-rate`}
+                        aria-label={`Rate for line ${row.key + 1}`}
                         type="number"
                         min="0"
                         step="0.01"

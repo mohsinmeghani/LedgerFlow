@@ -220,6 +220,9 @@ export function PaymentsPage() {
                         <td className="text-right">{formatMoney(purchase.balance)}</td>
                         <td className="text-right">
                           <input
+                            id={`allocation-${purchase.id}`}
+                            name={`allocation-${purchase.id}`}
+                            aria-label={`Allocate to purchase ${purchase.invoice_no || purchase.id}`}
                             type="number"
                             min="0"
                             max={purchase.balance}
