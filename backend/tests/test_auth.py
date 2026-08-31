@@ -56,3 +56,17 @@ def test_login_rejects_wrong_password(db_session: Session) -> None:
         app.dependency_overrides.clear()
 
     assert response.status_code == 401
+
+
+def test_protected_route_rejects_missing_token(db_session: Session) -> None:
+    def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+    try:
+        with TestClient(app) as client:
+            response = client.get("/api/v1/suppliers")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 401
