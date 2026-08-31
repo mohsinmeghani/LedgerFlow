@@ -74,12 +74,16 @@ def create_purchase(payload: PurchaseCreate, db: Session = Depends(get_db)) -> P
     )
 
     total = Decimal("0")
-    for line in payload.line_items:
+    for line_no, line in enumerate(payload.line_items):
         amount = (line.quantity * line.rate).quantize(Decimal("0.01"))
         total += amount
         purchase.line_items.append(
             PurchaseLineItem(
-                item_id=line.item_id, quantity=line.quantity, rate=line.rate, amount=amount
+                item_id=line.item_id,
+                line_no=line_no,
+                quantity=line.quantity,
+                rate=line.rate,
+                amount=amount,
             )
         )
     purchase.total_amount = total

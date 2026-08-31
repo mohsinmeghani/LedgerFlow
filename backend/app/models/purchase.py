@@ -28,6 +28,6 @@ class Purchase(UUIDPKMixin, TimestampMixin, Base):
         "PurchaseLineItem",
         back_populates="purchase",
         cascade="all, delete-orphan",
-        order_by="PurchaseLineItem.id",
+        order_by="PurchaseLineItem.line_no",
     )
     allocations = relationship("PaymentAllocation", back_populates="purchase")
