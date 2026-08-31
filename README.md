@@ -62,8 +62,16 @@ Requirements: Docker and Docker Compose.
 All endpoints live under `/api/v1` and require a JWT bearer token (from
 `POST /api/v1/auth/login`), except login itself. Key resources:
 
-- `suppliers`, `items` — CRUD (items has no delete; suppliers soft-deletes via
-  `DELETE`, which sets `is_active=false`)
+- `suppliers`, `items`, `item-categories`, `purchases`, `payments` — full CRUD.
+  `DELETE` on any of them permanently removes the row, but is rejected with
+  `409` if another module still references it (e.g. a supplier with purchases
+  or payments, an item used in a purchase, a category assigned to an item, or
+  a purchase with payments allocated against it). A payment has nothing
+  referencing it besides its own allocations, so it can always be deleted —
+  doing so frees up whatever balance it had allocated. Suppliers also support
+  a separate deactivate/reactivate toggle (`PUT .../{id}` with
+  `is_active: false|true`) for retiring a supplier with transaction history
+  instead of deleting it.
 - `purchases` — create with line items (totals are always server-computed);
   list/get responses include a derived `amount_paid` / `balance` / `status`
 - `payments` — create with optional `allocations` against the supplier's
