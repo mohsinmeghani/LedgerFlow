@@ -9,7 +9,7 @@ from app.config import settings
 from app.core.security import hash_password
 from app.database import SessionLocal
 from app.models.user import User
-from app.routers import auth, items, purchases, suppliers
+from app.routers import auth, items, payments, purchases, suppliers
 
 
 def seed_admin_user(db: Session) -> None:
@@ -49,6 +49,7 @@ app.include_router(auth.router)
 app.include_router(suppliers.router)
 app.include_router(items.router)
 app.include_router(purchases.router)
+app.include_router(payments.router)
 
 
 @app.get("/health", tags=["health"])
