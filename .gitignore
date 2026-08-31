@@ -30,4 +30,7 @@ Thumbs.db
 # Docker
 *.log
 
+# Claude Code harness runtime state (launch.json itself is tracked)
+.claude/scheduled_tasks.lock
+
 # Alembic (keep versions, ignore nothing special here)

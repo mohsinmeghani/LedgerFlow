@@ -43,18 +43,13 @@ Requirements: Docker and Docker Compose.
    docker compose up --build
    ```
 
-3. Once running:
+3. The `api` container applies Alembic migrations automatically on startup, so
+   there's nothing else to run manually. Once everything is up:
    - API: http://localhost:8000
    - Swagger / OpenAPI docs: http://localhost:8000/docs
    - Frontend: http://localhost:5173
 
-4. Apply database migrations (first run, or after pulling new migrations):
-
-   ```bash
-   docker compose exec api alembic upgrade head
-   ```
-
-5. Log in with the seeded admin user (see `.env.example` for
+4. Log in with the seeded admin user (see `.env.example` for
    `ADMIN_USERNAME` / `ADMIN_PASSWORD`, created on first startup).
 
 ## Running backend tests
