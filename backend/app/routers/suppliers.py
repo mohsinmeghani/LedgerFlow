@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -6,7 +7,9 @@ from sqlalchemy.orm import Session
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.models.supplier import Supplier
+from app.schemas.ledger import SupplierLedgerResponse
 from app.schemas.supplier import SupplierCreate, SupplierRead, SupplierUpdate
+from app.services.ledger import build_supplier_ledger
 
 router = APIRouter(
     prefix="/api/v1/suppliers",
@@ -63,3 +66,19 @@ def delete_supplier(supplier_id: uuid.UUID, db: Session = Depends(get_db)) -> No
     supplier = _get_supplier_or_404(db, supplier_id)
     supplier.is_active = False
     db.commit()
+
+
+@router.get("/{supplier_id}/ledger", response_model=SupplierLedgerResponse)
+def get_supplier_ledger(
+    supplier_id: uuid.UUID,
+    from_date: date | None = None,
+    to_date: date | None = None,
+    db: Session = Depends(get_db),
+) -> dict:
+    supplier = _get_supplier_or_404(db, supplier_id)
+    if from_date is not None and to_date is not None and from_date > to_date:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="from_date must not be after to_date",
+        )
+    return build_supplier_ledger(db, supplier, from_date, to_date)
