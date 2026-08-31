@@ -8,11 +8,18 @@ export interface Supplier {
   updated_at: string
 }
 
+export interface ItemCategory {
+  id: string
+  name: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Item {
   id: string
   name: string
   unit: string
-  category: string | null
+  category_id: string | null
   created_at: string
   updated_at: string
 }

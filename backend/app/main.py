@@ -9,7 +9,7 @@ from app.config import settings
 from app.core.security import hash_password
 from app.database import SessionLocal
 from app.models.user import User
-from app.routers import auth, dashboard, items, payments, purchases, suppliers
+from app.routers import auth, dashboard, item_categories, items, payments, purchases, suppliers
 
 
 def seed_admin_user(db: Session) -> None:
@@ -48,6 +48,7 @@ app.add_middleware(
 app.include_router(auth.router)
 app.include_router(suppliers.router)
 app.include_router(items.router)
+app.include_router(item_categories.router)
 app.include_router(purchases.router)
 app.include_router(payments.router)
 app.include_router(dashboard.router)

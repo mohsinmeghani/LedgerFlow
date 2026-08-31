@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 class ItemBase(BaseModel):
     name: str
     unit: str
-    category: str | None = None
+    category_id: uuid.UUID | None = None
 
 
 class ItemCreate(ItemBase):
@@ -17,7 +17,7 @@ class ItemCreate(ItemBase):
 class ItemUpdate(BaseModel):
     name: str | None = None
     unit: str | None = None
-    category: str | None = None
+    category_id: uuid.UUID | None = None
 
 
 class ItemRead(ItemBase):

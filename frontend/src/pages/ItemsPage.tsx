@@ -1,12 +1,15 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createItem, listItems, updateItem, type ItemInput } from '../api/items'
-import type { Item } from '../types'
+import { createItemCategory, listItemCategories } from '../api/itemCategories'
+import type { Item, ItemCategory } from '../types'
 
-const EMPTY_FORM: ItemInput = { name: '', unit: '', category: '' }
+const EMPTY_FORM: ItemInput = { name: '', unit: '', category_id: '' }
+const NEW_CATEGORY_VALUE = '__new__'
 
 export function ItemsPage() {
   const [items, setItems] = useState<Item[]>([])
+  const [categories, setCategories] = useState<ItemCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
 
@@ -16,11 +19,20 @@ export function ItemsPage() {
   const [formError, setFormError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
+  const [addingCategory, setAddingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [categorySaving, setCategorySaving] = useState(false)
+  const [categoryError, setCategoryError] = useState<string | null>(null)
+
+  const categoryNameById = new Map(categories.map((c) => [c.id, c.name]))
+
   async function load() {
     setLoading(true)
     setLoadError(null)
     try {
-      setItems(await listItems())
+      const [itemList, categoryList] = await Promise.all([listItems(), listItemCategories()])
+      setItems(itemList)
+      setCategories(categoryList)
     } catch (error) {
       setLoadError(getErrorMessage(error, 'Failed to load items.'))
     } finally {
@@ -36,14 +48,46 @@ export function ItemsPage() {
     setEditingId(null)
     setForm(EMPTY_FORM)
     setFormError(null)
+    setAddingCategory(false)
+    setNewCategoryName('')
+    setCategoryError(null)
     setFormOpen(true)
   }
 
   function startEdit(item: Item) {
     setEditingId(item.id)
-    setForm({ name: item.name, unit: item.unit, category: item.category ?? '' })
+    setForm({ name: item.name, unit: item.unit, category_id: item.category_id ?? '' })
     setFormError(null)
+    setAddingCategory(false)
+    setNewCategoryName('')
+    setCategoryError(null)
     setFormOpen(true)
+  }
+
+  function handleCategorySelect(value: string) {
+    if (value === NEW_CATEGORY_VALUE) {
+      setAddingCategory(true)
+      setCategoryError(null)
+      return
+    }
+    setForm({ ...form, category_id: value })
+  }
+
+  async function handleAddCategory() {
+    if (!newCategoryName.trim()) return
+    setCategorySaving(true)
+    setCategoryError(null)
+    try {
+      const category = await createItemCategory(newCategoryName.trim())
+      setCategories((current) => [...current, category].sort((a, b) => a.name.localeCompare(b.name)))
+      setForm((current) => ({ ...current, category_id: category.id }))
+      setAddingCategory(false)
+      setNewCategoryName('')
+    } catch (error) {
+      setCategoryError(getErrorMessage(error, 'Failed to add category.'))
+    } finally {
+      setCategorySaving(false)
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -51,10 +95,11 @@ export function ItemsPage() {
     setSubmitting(true)
     setFormError(null)
     try {
+      const payload: ItemInput = { ...form, category_id: form.category_id || null }
       if (editingId) {
-        await updateItem(editingId, form)
+        await updateItem(editingId, payload)
       } else {
-        await createItem(form)
+        await createItem(payload)
       }
       setFormOpen(false)
       await load()
@@ -99,11 +144,53 @@ export function ItemsPage() {
             </div>
             <div className="form-field">
               <label htmlFor="item-category">Category</label>
-              <input
-                id="item-category"
-                value={form.category ?? ''}
-                onChange={(event) => setForm({ ...form, category: event.target.value })}
-              />
+              {!addingCategory && (
+                <select
+                  id="item-category"
+                  value={form.category_id ?? ''}
+                  onChange={(event) => handleCategorySelect(event.target.value)}
+                >
+                  <option value="">No category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                  <option value={NEW_CATEGORY_VALUE}>+ Add new category…</option>
+                </select>
+              )}
+              {addingCategory && (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    id="item-new-category"
+                    placeholder="New category name"
+                    value={newCategoryName}
+                    onChange={(event) => setNewCategoryName(event.target.value)}
+                    autoFocus
+                  />
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    onClick={handleAddCategory}
+                    disabled={categorySaving || !newCategoryName.trim()}
+                  >
+                    {categorySaving ? 'Adding…' : 'Add'}
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    onClick={() => {
+                      setAddingCategory(false)
+                      setNewCategoryName('')
+                      setCategoryError(null)
+                    }}
+                    disabled={categorySaving}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+              {categoryError && <div className="error-text">{categoryError}</div>}
             </div>
           </div>
           {formError && <div className="error-text">{formError}</div>}
@@ -141,7 +228,7 @@ export function ItemsPage() {
               <tr key={item.id}>
                 <td>{item.name}</td>
                 <td>{item.unit}</td>
-                <td>{item.category || '—'}</td>
+                <td>{(item.category_id && categoryNameById.get(item.category_id)) || '—'}</td>
                 <td>
                   <button className="btn btn-secondary" type="button" onClick={() => startEdit(item)}>
                     Edit

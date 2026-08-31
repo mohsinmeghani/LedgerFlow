@@ -4,7 +4,7 @@ import type { Item } from '../types'
 export interface ItemInput {
   name: string
   unit: string
-  category?: string | null
+  category_id?: string | null
 }
 
 export async function listItems(): Promise<Item[]> {
