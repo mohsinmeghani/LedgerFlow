@@ -7,6 +7,7 @@ from app.core.deps import get_current_user
 from app.database import get_db
 from app.models.item import Item
 from app.models.item_category import ItemCategory
+from app.models.purchase_line_item import PurchaseLineItem
 from app.schemas.item import ItemCreate, ItemRead, ItemUpdate
 
 router = APIRouter(
@@ -66,3 +67,21 @@ def update_item(
     db.commit()
     db.refresh(item)
     return item
+
+
+@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_item(item_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
+    item = _get_item_or_404(db, item_id)
+
+    in_use = (
+        db.query(PurchaseLineItem.id).filter(PurchaseLineItem.item_id == item_id).first()
+        is not None
+    )
+    if in_use:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This item is used by the purchases module and cannot be deleted.",
+        )
+
+    db.delete(item)
+    db.commit()

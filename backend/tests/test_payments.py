@@ -156,3 +156,31 @@ def test_payment_without_allocations_is_allowed(client: TestClient) -> None:
     )
     assert response.status_code == 201
     assert response.json()["allocations"] == []
+
+
+def test_delete_payment_frees_up_purchase_balance(client: TestClient) -> None:
+    supplier_id = _make_supplier(client)
+    item_id = _make_item(client)
+    purchase = _make_purchase(client, supplier_id, item_id, "500.00")
+    payment = client.post(
+        "/api/v1/payments",
+        json={
+            "supplier_id": supplier_id,
+            "payment_date": "2026-01-20",
+            "amount": "300.00",
+            "method": "cash",
+            "allocations": [{"purchase_id": purchase["id"], "allocated_amount": "300.00"}],
+        },
+    ).json()
+
+    purchase_after_payment = client.get(f"/api/v1/purchases/{purchase['id']}").json()
+    assert purchase_after_payment["balance"] == "200.00"
+
+    response = client.delete(f"/api/v1/payments/{payment['id']}")
+    assert response.status_code == 204
+
+    response = client.get(f"/api/v1/payments/{payment['id']}")
+    assert response.status_code == 404
+
+    purchase_after_delete = client.get(f"/api/v1/purchases/{purchase['id']}").json()
+    assert purchase_after_delete["balance"] == "500.00"

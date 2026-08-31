@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
-import { createPayment, listPayments } from '../api/payments'
+import { createPayment, deletePayment, listPayments } from '../api/payments'
 import { listPurchases } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
 import type { Payment, PurchaseWithBalance, Supplier } from '../types'
@@ -119,6 +119,17 @@ export function PaymentsPage() {
       setFormError(getErrorMessage(error, 'Failed to save payment.'))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleDelete(payment: Payment) {
+    if (!window.confirm('Permanently delete this payment? Any allocated purchases will become outstanding again.'))
+      return
+    try {
+      await deletePayment(payment.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to delete payment.'))
     }
   }
 
@@ -282,6 +293,7 @@ export function PaymentsPage() {
               <th>Method</th>
               <th>Notes</th>
               <th>Allocations</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -293,11 +305,16 @@ export function PaymentsPage() {
                 <td>{payment.method}</td>
                 <td>{payment.notes || '—'}</td>
                 <td>{payment.allocations.length} purchase(s)</td>
+                <td>
+                  <button className="btn btn-danger" type="button" onClick={() => handleDelete(payment)}>
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
             {payments.length === 0 && (
               <tr>
-                <td colSpan={6} className="muted">
+                <td colSpan={7} className="muted">
                   No payments yet.
                 </td>
               </tr>

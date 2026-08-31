@@ -25,18 +25,66 @@ def test_update_supplier(client: TestClient) -> None:
     assert response.json()["name"] == "New Name"
 
 
-def test_soft_delete_supplier_excluded_from_default_list(client: TestClient) -> None:
-    created = client.post("/api/v1/suppliers", json={"name": "To Delete"}).json()
+def test_deactivate_supplier_excluded_from_default_list(client: TestClient) -> None:
+    created = client.post("/api/v1/suppliers", json={"name": "To Deactivate"}).json()
 
-    response = client.delete(f"/api/v1/suppliers/{created['id']}")
-    assert response.status_code == 204
+    response = client.put(f"/api/v1/suppliers/{created['id']}", json={"is_active": False})
+    assert response.status_code == 200
+    assert response.json()["is_active"] is False
 
     active = client.get("/api/v1/suppliers").json()
     assert all(s["id"] != created["id"] for s in active)
 
     everyone = client.get("/api/v1/suppliers", params={"include_inactive": True}).json()
-    deleted = next(s for s in everyone if s["id"] == created["id"])
-    assert deleted["is_active"] is False
+    deactivated = next(s for s in everyone if s["id"] == created["id"])
+    assert deactivated["is_active"] is False
+
+
+def test_delete_unused_supplier_succeeds(client: TestClient) -> None:
+    created = client.post("/api/v1/suppliers", json={"name": "Never Used"}).json()
+
+    response = client.delete(f"/api/v1/suppliers/{created['id']}")
+    assert response.status_code == 204
+
+    response = client.get(f"/api/v1/suppliers/{created['id']}")
+    assert response.status_code == 404
+
+
+def test_delete_supplier_with_purchases_is_blocked(client: TestClient) -> None:
+    supplier = client.post("/api/v1/suppliers", json={"name": "Has Purchases"}).json()
+    item = client.post("/api/v1/items", json={"name": "Leather", "unit": "sqft"}).json()
+    client.post(
+        "/api/v1/purchases",
+        json={
+            "supplier_id": supplier["id"],
+            "purchase_date": "2026-01-15",
+            "line_items": [{"item_id": item["id"], "quantity": "1", "rate": "10.00"}],
+        },
+    )
+
+    response = client.delete(f"/api/v1/suppliers/{supplier['id']}")
+    assert response.status_code == 409
+    assert "purchases" in response.json()["detail"]
+
+    still_there = client.get(f"/api/v1/suppliers/{supplier['id']}")
+    assert still_there.status_code == 200
+
+
+def test_delete_supplier_with_payments_is_blocked(client: TestClient) -> None:
+    supplier = client.post("/api/v1/suppliers", json={"name": "Has Payments"}).json()
+    client.post(
+        "/api/v1/payments",
+        json={
+            "supplier_id": supplier["id"],
+            "payment_date": "2026-01-15",
+            "amount": "100.00",
+            "method": "cash",
+        },
+    )
+
+    response = client.delete(f"/api/v1/suppliers/{supplier['id']}")
+    assert response.status_code == 409
+    assert "payments" in response.json()["detail"]
 
 
 def test_get_missing_supplier_returns_404(client: TestClient) -> None:

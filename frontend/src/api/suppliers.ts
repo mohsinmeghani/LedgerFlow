@@ -24,6 +24,16 @@ export async function updateSupplier(id: string, input: Partial<SupplierInput>):
   return response.data
 }
 
-export async function deactivateSupplier(id: string): Promise<void> {
+export async function deactivateSupplier(id: string): Promise<Supplier> {
+  const response = await apiClient.put<Supplier>(`/suppliers/${id}`, { is_active: false })
+  return response.data
+}
+
+export async function reactivateSupplier(id: string): Promise<Supplier> {
+  const response = await apiClient.put<Supplier>(`/suppliers/${id}`, { is_active: true })
+  return response.data
+}
+
+export async function deleteSupplier(id: string): Promise<void> {
   await apiClient.delete(`/suppliers/${id}`)
 }

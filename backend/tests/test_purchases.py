@@ -125,3 +125,49 @@ def test_list_purchases_includes_balance_and_status(client: TestClient) -> None:
     assert body[0]["amount_paid"] == "0.00" or body[0]["amount_paid"] == "0"
     assert body[0]["status"] == "unpaid"
     assert body[0]["balance"] == body[0]["total_amount"]
+
+
+def test_delete_unpaid_purchase_succeeds(client: TestClient) -> None:
+    supplier_id = _make_supplier(client)
+    item_id = _make_item(client)
+    purchase = client.post(
+        "/api/v1/purchases",
+        json={
+            "supplier_id": supplier_id,
+            "purchase_date": "2026-01-15",
+            "line_items": [{"item_id": item_id, "quantity": "1", "rate": "100.00"}],
+        },
+    ).json()
+
+    response = client.delete(f"/api/v1/purchases/{purchase['id']}")
+    assert response.status_code == 204
+
+    response = client.get(f"/api/v1/purchases/{purchase['id']}")
+    assert response.status_code == 404
+
+
+def test_delete_purchase_with_payment_allocation_is_blocked(client: TestClient) -> None:
+    supplier_id = _make_supplier(client)
+    item_id = _make_item(client)
+    purchase = client.post(
+        "/api/v1/purchases",
+        json={
+            "supplier_id": supplier_id,
+            "purchase_date": "2026-01-15",
+            "line_items": [{"item_id": item_id, "quantity": "1", "rate": "100.00"}],
+        },
+    ).json()
+    client.post(
+        "/api/v1/payments",
+        json={
+            "supplier_id": supplier_id,
+            "payment_date": "2026-01-20",
+            "amount": "50.00",
+            "method": "cash",
+            "allocations": [{"purchase_id": purchase["id"], "allocated_amount": "50.00"}],
+        },
+    )
+
+    response = client.delete(f"/api/v1/purchases/{purchase['id']}")
+    assert response.status_code == 409
+    assert "payments" in response.json()["detail"]

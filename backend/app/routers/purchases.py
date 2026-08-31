@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 from app.core.deps import get_current_user
 from app.database import get_db
 from app.models.item import Item
+from app.models.payment_allocation import PaymentAllocation
 from app.models.purchase import Purchase
 from app.models.purchase_line_item import PurchaseLineItem
 from app.models.supplier import Supplier
@@ -121,3 +122,23 @@ def get_purchase(purchase_id: uuid.UUID, db: Session = Depends(get_db)) -> dict:
     purchase = _get_purchase_or_404(db, purchase_id)
     paid = get_amount_paid_for_purchase(db, purchase_id)
     return build_purchase_with_balance(purchase, paid)
+
+
+@router.delete("/{purchase_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_purchase(purchase_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
+    purchase = _get_purchase_or_404(db, purchase_id)
+
+    has_payments = (
+        db.query(PaymentAllocation.id)
+        .filter(PaymentAllocation.purchase_id == purchase_id)
+        .first()
+        is not None
+    )
+    if has_payments:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This purchase is used by the payments module and cannot be deleted.",
+        )
+
+    db.delete(purchase)
+    db.commit()

@@ -36,3 +36,7 @@ export async function createPurchase(input: PurchaseCreateInput): Promise<Purcha
   const response = await apiClient.post<Purchase>('/purchases', input)
   return response.data
 }
+
+export async function deletePurchase(id: string): Promise<void> {
+  await apiClient.delete(`/purchases/${id}`)
+}

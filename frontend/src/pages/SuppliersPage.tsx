@@ -3,7 +3,9 @@ import { getErrorMessage } from '../api/errors'
 import {
   createSupplier,
   deactivateSupplier,
+  deleteSupplier,
   listSuppliers,
+  reactivateSupplier,
   updateSupplier,
   type SupplierInput,
 } from '../api/suppliers'
@@ -84,6 +86,26 @@ export function SuppliersPage() {
       await load()
     } catch (error) {
       window.alert(getErrorMessage(error, 'Failed to deactivate supplier.'))
+    }
+  }
+
+  async function handleReactivate(supplier: Supplier) {
+    try {
+      await reactivateSupplier(supplier.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to reactivate supplier.'))
+    }
+  }
+
+  async function handleDelete(supplier: Supplier) {
+    if (!window.confirm(`Permanently delete supplier "${supplier.name}"? This cannot be undone.`))
+      return
+    try {
+      await deleteSupplier(supplier.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to delete supplier.'))
     }
   }
 
@@ -184,15 +206,26 @@ export function SuppliersPage() {
                   <button className="btn btn-secondary" type="button" onClick={() => startEdit(supplier)}>
                     Edit
                   </button>{' '}
-                  {supplier.is_active && (
+                  {supplier.is_active ? (
                     <button
-                      className="btn btn-danger"
+                      className="btn btn-secondary"
                       type="button"
                       onClick={() => handleDeactivate(supplier)}
                     >
                       Deactivate
                     </button>
-                  )}
+                  ) : (
+                    <button
+                      className="btn btn-secondary"
+                      type="button"
+                      onClick={() => handleReactivate(supplier)}
+                    >
+                      Reactivate
+                    </button>
+                  )}{' '}
+                  <button className="btn btn-danger" type="button" onClick={() => handleDelete(supplier)}>
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

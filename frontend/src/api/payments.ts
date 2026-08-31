@@ -26,3 +26,7 @@ export async function createPayment(input: PaymentCreateInput): Promise<Payment>
   const response = await apiClient.post<Payment>('/payments', input)
   return response.data
 }
+
+export async function deletePayment(id: string): Promise<void> {
+  await apiClient.delete(`/payments/${id}`)
+}

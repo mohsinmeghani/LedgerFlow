@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user
 from app.database import get_db
+from app.models.payment import Payment
+from app.models.purchase import Purchase
 from app.models.supplier import Supplier
 from app.schemas.ledger import SupplierLedgerResponse
 from app.schemas.supplier import SupplierCreate, SupplierRead, SupplierUpdate
@@ -64,7 +66,20 @@ def update_supplier(
 @router.delete("/{supplier_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_supplier(supplier_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
     supplier = _get_supplier_or_404(db, supplier_id)
-    supplier.is_active = False
+
+    used_by = []
+    if db.query(Purchase.id).filter(Purchase.supplier_id == supplier_id).first() is not None:
+        used_by.append("purchases")
+    if db.query(Payment.id).filter(Payment.supplier_id == supplier_id).first() is not None:
+        used_by.append("payments")
+    if used_by:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"This supplier is used by the {'/'.join(used_by)} module and cannot be deleted. "
+            "Deactivate it instead.",
+        )
+
+    db.delete(supplier)
     db.commit()
 
 

@@ -21,3 +21,7 @@ export async function updateItem(id: string, input: Partial<ItemInput>): Promise
   const response = await apiClient.put<Item>(`/items/${id}`, input)
   return response.data
 }
+
+export async function deleteItem(id: string): Promise<void> {
+  await apiClient.delete(`/items/${id}`)
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
-import { createItem, listItems, updateItem, type ItemInput } from '../api/items'
-import { createItemCategory, listItemCategories } from '../api/itemCategories'
+import { createItem, deleteItem, listItems, updateItem, type ItemInput } from '../api/items'
+import { createItemCategory, deleteItemCategory, listItemCategories } from '../api/itemCategories'
 import type { Item, ItemCategory } from '../types'
 
 const EMPTY_FORM: ItemInput = { name: '', unit: '', category_id: '' }
@@ -23,6 +23,8 @@ export function ItemsPage() {
   const [newCategoryName, setNewCategoryName] = useState('')
   const [categorySaving, setCategorySaving] = useState(false)
   const [categoryError, setCategoryError] = useState<string | null>(null)
+
+  const [manageCategoriesOpen, setManageCategoriesOpen] = useState(false)
 
   const categoryNameById = new Map(categories.map((c) => [c.id, c.name]))
 
@@ -90,6 +92,26 @@ export function ItemsPage() {
     }
   }
 
+  async function handleDeleteItem(item: Item) {
+    if (!window.confirm(`Permanently delete item "${item.name}"?`)) return
+    try {
+      await deleteItem(item.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to delete item.'))
+    }
+  }
+
+  async function handleDeleteCategory(category: ItemCategory) {
+    if (!window.confirm(`Permanently delete category "${category.name}"?`)) return
+    try {
+      await deleteItemCategory(category.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to delete category.'))
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setSubmitting(true)
@@ -114,10 +136,56 @@ export function ItemsPage() {
     <div>
       <div className="page-header">
         <h1>Items</h1>
-        <button className="btn" type="button" onClick={startCreate}>
-          Add Item
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => setManageCategoriesOpen((open) => !open)}
+          >
+            {manageCategoriesOpen ? 'Hide Categories' : 'Manage Categories'}
+          </button>
+          <button className="btn" type="button" onClick={startCreate}>
+            Add Item
+          </button>
+        </div>
       </div>
+
+      {manageCategoriesOpen && (
+        <div className="card">
+          <h2 style={{ marginTop: 0 }}>Categories</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.map((category) => (
+                <tr key={category.id}>
+                  <td>{category.name}</td>
+                  <td>
+                    <button
+                      className="btn btn-danger"
+                      type="button"
+                      onClick={() => handleDeleteCategory(category)}
+                    >
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {categories.length === 0 && (
+                <tr>
+                  <td colSpan={2} className="muted">
+                    No categories yet. Add one from the item form below.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {formOpen && (
         <form className="card" onSubmit={handleSubmit}>
@@ -232,6 +300,9 @@ export function ItemsPage() {
                 <td>
                   <button className="btn btn-secondary" type="button" onClick={() => startEdit(item)}>
                     Edit
+                  </button>{' '}
+                  <button className="btn btn-danger" type="button" onClick={() => handleDeleteItem(item)}>
+                    Delete
                   </button>
                 </td>
               </tr>

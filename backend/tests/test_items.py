@@ -52,3 +52,30 @@ def test_update_item(client: TestClient) -> None:
     assert response.json()["unit"] == "ltr"
     assert response.json()["name"] == "Dye"
     assert response.json()["category_id"] == category_id
+
+
+def test_delete_unused_item_succeeds(client: TestClient) -> None:
+    created = client.post("/api/v1/items", json={"name": "Unused", "unit": "pcs"}).json()
+
+    response = client.delete(f"/api/v1/items/{created['id']}")
+    assert response.status_code == 204
+
+    response = client.get(f"/api/v1/items/{created['id']}")
+    assert response.status_code == 404
+
+
+def test_delete_item_used_in_purchase_is_blocked(client: TestClient) -> None:
+    item = client.post("/api/v1/items", json={"name": "Leather", "unit": "sqft"}).json()
+    supplier = client.post("/api/v1/suppliers", json={"name": "Acme"}).json()
+    client.post(
+        "/api/v1/purchases",
+        json={
+            "supplier_id": supplier["id"],
+            "purchase_date": "2026-01-15",
+            "line_items": [{"item_id": item["id"], "quantity": "1", "rate": "10.00"}],
+        },
+    )
+
+    response = client.delete(f"/api/v1/items/{item['id']}")
+    assert response.status_code == 409
+    assert "purchases" in response.json()["detail"]

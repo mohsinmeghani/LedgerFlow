@@ -116,3 +116,13 @@ def list_payments(
 @router.get("/{payment_id}", response_model=PaymentRead)
 def get_payment(payment_id: uuid.UUID, db: Session = Depends(get_db)) -> Payment:
     return _get_payment_or_404(db, payment_id)
+
+
+@router.delete("/{payment_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_payment(payment_id: uuid.UUID, db: Session = Depends(get_db)) -> None:
+    payment = _get_payment_or_404(db, payment_id)
+    # Nothing else references a payment as a foreign key besides its own
+    # allocations, which cascade-delete with it — deleting a payment simply
+    # frees up whatever balance it had allocated against those purchases.
+    db.delete(payment)
+    db.commit()

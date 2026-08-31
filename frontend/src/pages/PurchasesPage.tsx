@@ -1,7 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { listItems } from '../api/items'
-import { createPurchase, listPurchases, type PurchaseLineItemInput } from '../api/purchases'
+import {
+  createPurchase,
+  deletePurchase,
+  listPurchases,
+  type PurchaseLineItemInput,
+} from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
 import type { Item, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney, statusLabel } from '../utils/format'
@@ -110,6 +115,17 @@ export function PurchasesPage() {
       setFormError(getErrorMessage(error, 'Failed to save purchase.'))
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleDelete(purchase: PurchaseWithBalance) {
+    if (!window.confirm(`Permanently delete this purchase (${purchase.invoice_no || purchase.id})?`))
+      return
+    try {
+      await deletePurchase(purchase.id)
+      await load()
+    } catch (error) {
+      window.alert(getErrorMessage(error, 'Failed to delete purchase.'))
     }
   }
 
@@ -294,6 +310,7 @@ export function PurchasesPage() {
               <th className="text-right">Paid</th>
               <th className="text-right">Balance</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -310,11 +327,16 @@ export function PurchasesPage() {
                     {statusLabel(purchase.status)}
                   </span>
                 </td>
+                <td>
+                  <button className="btn btn-danger" type="button" onClick={() => handleDelete(purchase)}>
+                    Delete
+                  </button>
+                </td>
               </tr>
             ))}
             {purchases.length === 0 && (
               <tr>
-                <td colSpan={7} className="muted">
+                <td colSpan={8} className="muted">
                   No purchases yet.
                 </td>
               </tr>
