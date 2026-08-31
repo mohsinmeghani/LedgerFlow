@@ -1,5 +1,6 @@
 import uuid
 from datetime import date
+from decimal import Decimal
 
 from sqlalchemy import Date, ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
@@ -16,7 +17,7 @@ class Payment(UUIDPKMixin, TimestampMixin, Base):
         UUID(as_uuid=True), ForeignKey("suppliers.id"), nullable=False
     )
     payment_date: Mapped[date] = mapped_column(Date, nullable=False)
-    amount: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
     method: Mapped[str] = mapped_column(String(50), nullable=False)
     notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
 

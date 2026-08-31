@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.dialects.postgresql import UUID
@@ -17,7 +18,7 @@ class PaymentAllocation(UUIDPKMixin, Base):
     purchase_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("purchases.id"), nullable=False
     )
-    allocated_amount: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
+    allocated_amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
 
     payment = relationship("Payment", back_populates="allocations")
     purchase = relationship("Purchase", back_populates="allocations")

@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from sqlalchemy import ForeignKey, Numeric
 from sqlalchemy.dialects.postgresql import UUID
@@ -17,9 +18,9 @@ class PurchaseLineItem(UUIDPKMixin, Base):
     item_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("items.id"), nullable=False
     )
-    quantity: Mapped[float] = mapped_column(Numeric(12, 3), nullable=False)
-    rate: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False)
-    amount: Mapped[float] = mapped_column(Numeric(14, 2), nullable=False)
+    quantity: Mapped[Decimal] = mapped_column(Numeric(12, 3), nullable=False)
+    rate: Mapped[Decimal] = mapped_column(Numeric(12, 2), nullable=False)
+    amount: Mapped[Decimal] = mapped_column(Numeric(14, 2), nullable=False)
 
     purchase = relationship("Purchase", back_populates="line_items")
     item = relationship("Item")
