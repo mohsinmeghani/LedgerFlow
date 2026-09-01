@@ -355,6 +355,28 @@ button {
   box-shadow: 0 6px 18px rgba(225, 29, 72, 0.28);
 }
 
+.btn-listening {
+  background: var(--color-danger-light);
+  border-color: var(--color-danger);
+  color: var(--color-danger-dark);
+}
+
+.btn-listening .icon {
+  animation: mic-pulse 1s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
+}
+
 table {
   width: 100%;
   border-collapse: collapse;

@@ -1,4 +1,4 @@
-import { Check, Plus, Trash2, X } from 'lucide-react'
+import { Check, Mic, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createPayment, deletePayment, listPayments } from '../api/payments'
@@ -6,8 +6,10 @@ import { listPurchases } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
 import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
+import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import type { Payment, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney } from '../utils/format'
+import { parseVoicePayment } from '../utils/voicePaymentParser'
 
 const PAYMENT_METHODS = ['cash', 'bank transfer', 'cheque', 'other']
 
@@ -16,7 +18,7 @@ function today(): string {
 }
 
 export function PaymentsPage() {
-  const { showError } = useToast()
+  const { showError, showSuccess } = useToast()
   const confirm = useConfirm()
   const [payments, setPayments] = useState<Payment[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
@@ -144,14 +146,66 @@ export function PaymentsPage() {
     }
   }
 
+  async function handleVoiceResult(transcript: string) {
+    const parsed = parseVoicePayment(transcript, suppliers)
+    if ('error' in parsed) {
+      showError(parsed.error)
+      return
+    }
+
+    const confirmed = await confirm({
+      title: 'Confirm voice payment',
+      message: `Record a cash payment of ${formatMoney(parsed.amount)} to "${parsed.supplier.name}"? (Heard: "${transcript}")`,
+      confirmLabel: 'Record Payment',
+    })
+    if (!confirmed) return
+
+    try {
+      await createPayment({
+        supplier_id: parsed.supplier.id,
+        payment_date: today(),
+        amount: String(parsed.amount),
+        method: 'cash',
+        allocations: [],
+      })
+      showSuccess(`Recorded payment of ${formatMoney(parsed.amount)} to ${parsed.supplier.name}.`)
+      await load()
+    } catch (error) {
+      showError(getErrorMessage(error, 'Failed to save voice payment.'))
+    }
+  }
+
+  const {
+    isSupported: voiceSupported,
+    isListening,
+    start: startListening,
+  } = useSpeechRecognition({
+    onResult: handleVoiceResult,
+    onError: (message) => showError(message),
+  })
+
   return (
     <div>
       <div className="page-header">
         <h1>Payments</h1>
-        <button className="btn" type="button" onClick={startCreate} disabled={suppliers.length === 0}>
-          <Plus className="icon" size={16} />
-          Add Payment
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {voiceSupported && (
+            <button
+              className={`btn btn-secondary${isListening ? ' btn-listening' : ''}`}
+              type="button"
+              onClick={startListening}
+              disabled={isListening || suppliers.length === 0}
+              title='Say something like "paid kamal 1000"'
+            >
+              <Mic className="icon" size={16} />
+              {isListening ? 'Listening…' : 'Voice Payment'}
+            </button>
+          )}
+          <button className="btn" type="button" onClick={startCreate} disabled={suppliers.length === 0}>
+            <Plus className="icon" size={16} />
+            Add Payment
+          </button>
+        </div>
       </div>
 
       {!loading && suppliers.length === 0 && <p className="muted">Add a supplier before recording a payment.</p>}
