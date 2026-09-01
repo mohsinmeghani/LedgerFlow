@@ -9,6 +9,7 @@ import {
   type PurchaseLineItemInput,
 } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
+import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
 import type { Item, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney, statusLabel } from '../utils/format'
@@ -27,6 +28,7 @@ function today(): string {
 
 export function PurchasesPage() {
   const { showError } = useToast()
+  const confirm = useConfirm()
   const [purchases, setPurchases] = useState<PurchaseWithBalance[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [items, setItems] = useState<Item[]>([])
@@ -122,8 +124,13 @@ export function PurchasesPage() {
   }
 
   async function handleDelete(purchase: PurchaseWithBalance) {
-    if (!window.confirm(`Permanently delete this purchase (${purchase.invoice_no || purchase.id})?`))
-      return
+    const confirmed = await confirm({
+      title: 'Delete purchase?',
+      message: `Permanently delete this purchase (${purchase.invoice_no || purchase.id})? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!confirmed) return
     try {
       await deletePurchase(purchase.id)
       await load()

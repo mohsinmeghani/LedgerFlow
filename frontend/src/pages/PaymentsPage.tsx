@@ -4,6 +4,7 @@ import { getErrorMessage } from '../api/errors'
 import { createPayment, deletePayment, listPayments } from '../api/payments'
 import { listPurchases } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
+import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
 import type { Payment, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney } from '../utils/format'
@@ -16,6 +17,7 @@ function today(): string {
 
 export function PaymentsPage() {
   const { showError } = useToast()
+  const confirm = useConfirm()
   const [payments, setPayments] = useState<Payment[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [loading, setLoading] = useState(true)
@@ -126,8 +128,14 @@ export function PaymentsPage() {
   }
 
   async function handleDelete(payment: Payment) {
-    if (!window.confirm('Permanently delete this payment? Any allocated purchases will become outstanding again.'))
-      return
+    const confirmed = await confirm({
+      title: 'Delete payment?',
+      message:
+        'Permanently delete this payment? Any allocated purchases will become outstanding again.',
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!confirmed) return
     try {
       await deletePayment(payment.id)
       await load()

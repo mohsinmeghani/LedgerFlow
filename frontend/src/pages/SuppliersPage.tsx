@@ -10,6 +10,7 @@ import {
   updateSupplier,
   type SupplierInput,
 } from '../api/suppliers'
+import { useConfirm } from '../context/ConfirmContext'
 import { useToast } from '../context/ToastContext'
 import type { Supplier } from '../types'
 
@@ -17,6 +18,7 @@ const EMPTY_FORM: SupplierInput = { name: '', contact: '', address: '' }
 
 export function SuppliersPage() {
   const { showError } = useToast()
+  const confirm = useConfirm()
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -83,7 +85,12 @@ export function SuppliersPage() {
   }
 
   async function handleDeactivate(supplier: Supplier) {
-    if (!window.confirm(`Deactivate supplier "${supplier.name}"?`)) return
+    const confirmed = await confirm({
+      title: 'Deactivate supplier?',
+      message: `Deactivate supplier "${supplier.name}"? It will be hidden from the active list but its history is kept.`,
+      confirmLabel: 'Deactivate',
+    })
+    if (!confirmed) return
     try {
       await deactivateSupplier(supplier.id)
       await load()
@@ -102,8 +109,13 @@ export function SuppliersPage() {
   }
 
   async function handleDelete(supplier: Supplier) {
-    if (!window.confirm(`Permanently delete supplier "${supplier.name}"? This cannot be undone.`))
-      return
+    const confirmed = await confirm({
+      title: 'Delete supplier?',
+      message: `Permanently delete supplier "${supplier.name}"? This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!confirmed) return
     try {
       await deleteSupplier(supplier.id)
       await load()

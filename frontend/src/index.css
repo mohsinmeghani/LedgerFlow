@@ -582,3 +582,83 @@ td select:focus {
     transform: translateX(0);
   }
 }
+
+/* Confirm dialog */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(23, 20, 60, 0.45);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  animation: overlay-in 0.15s ease-out;
+}
+
+.confirm-dialog {
+  background: var(--color-surface);
+  border-radius: 14px;
+  padding: 1.75rem;
+  width: 380px;
+  max-width: calc(100vw - 2rem);
+  box-shadow: var(--shadow-lg);
+  animation: dialog-in 0.18s ease-out;
+}
+
+.confirm-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  margin-bottom: 0.9rem;
+}
+
+.confirm-icon-danger {
+  background: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.confirm-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem;
+}
+
+.confirm-message {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
