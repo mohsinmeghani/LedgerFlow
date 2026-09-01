@@ -1,3 +1,4 @@
+import { LogIn, Waves } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
@@ -33,7 +34,10 @@ export function LoginPage() {
   return (
     <div className="login-page">
       <form className="login-card" onSubmit={handleSubmit}>
-        <h1>LedgerFlow</h1>
+        <h1 className="login-title">
+          <Waves className="icon" size={24} />
+          LedgerFlow
+        </h1>
         <p className="login-subtitle">Sign in to continue</p>
 
         <label htmlFor="username">Username</label>
@@ -58,6 +62,7 @@ export function LoginPage() {
         {error && <div className="error-text">{error}</div>}
 
         <button type="submit" disabled={submitting}>
+          <LogIn className="icon" size={16} />
           {submitting ? 'Signing in…' : 'Sign in'}
         </button>
       </form>

@@ -1,3 +1,4 @@
+import { Filter, FilterX } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { getSupplierLedger } from '../api/ledger'
@@ -94,9 +95,11 @@ export function LedgerPage() {
         </div>
         <div className="form-actions">
           <button className="btn" type="button" onClick={handleApplyFilter} disabled={!supplierId}>
+            <Filter className="icon" size={16} />
             Apply Filter
           </button>
           <button className="btn btn-secondary" type="button" onClick={handleClearFilter} disabled={!supplierId}>
+            <FilterX className="icon" size={16} />
             Clear Filter
           </button>
         </div>

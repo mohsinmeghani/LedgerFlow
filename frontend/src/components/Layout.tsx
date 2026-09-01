@@ -1,27 +1,48 @@
-import { useState } from 'react'
+import {
+  BarChart3,
+  Boxes,
+  ChevronRight,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Receipt,
+  ScrollText,
+  Truck,
+  Wallet,
+  Waves,
+  type LucideIcon,
+} from 'lucide-react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 
-const rootItem = { to: '/', label: 'Dashboard', end: true }
+const rootItem = { to: '/', label: 'Dashboard', end: true, icon: LayoutDashboard }
 
-const navGroups: { label: string; items: { to: string; label: string }[] }[] = [
+const navGroups: {
+  label: string
+  icon: LucideIcon
+  items: { to: string; label: string; icon: LucideIcon }[]
+}[] = [
   {
     label: 'Masters',
+    icon: Boxes,
     items: [
-      { to: '/suppliers', label: 'Suppliers' },
-      { to: '/items', label: 'Items' },
+      { to: '/suppliers', label: 'Suppliers', icon: Truck },
+      { to: '/items', label: 'Items', icon: Package },
     ],
   },
   {
     label: 'Transactions',
+    icon: Receipt,
     items: [
-      { to: '/purchases', label: 'Purchases' },
-      { to: '/payments', label: 'Payments' },
+      { to: '/purchases', label: 'Purchases', icon: Receipt },
+      { to: '/payments', label: 'Payments', icon: Wallet },
     ],
   },
   {
     label: 'Reports',
-    items: [{ to: '/ledger', label: 'Ledger' }],
+    icon: BarChart3,
+    items: [{ to: '/ledger', label: 'Ledger', icon: ScrollText }],
   },
 ]
 
@@ -44,13 +65,17 @@ export function Layout() {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand">LedgerFlow</div>
+        <div className="brand">
+          <Waves className="icon" size={22} />
+          LedgerFlow
+        </div>
         <nav>
           <NavLink
             to={rootItem.to}
             end={rootItem.end}
             className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
           >
+            <rootItem.icon className="icon" size={17} />
             {rootItem.label}
           </NavLink>
 
@@ -64,7 +89,8 @@ export function Layout() {
                   onClick={() => toggleGroup(group.label)}
                   aria-expanded={isOpen}
                 >
-                  <span className="nav-group-chevron">▸</span>
+                  <ChevronRight className="icon nav-group-chevron" size={14} />
+                  <group.icon className="icon" size={16} />
                   {group.label}
                 </button>
                 {isOpen && (
@@ -75,6 +101,7 @@ export function Layout() {
                         to={item.to}
                         className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
                       >
+                        <item.icon className="icon" size={16} />
                         {item.label}
                       </NavLink>
                     ))}
@@ -85,6 +112,7 @@ export function Layout() {
           })}
         </nav>
         <button className="logout-button" onClick={logout} type="button">
+          <LogOut className="icon" size={16} />
           Log out
         </button>
       </aside>

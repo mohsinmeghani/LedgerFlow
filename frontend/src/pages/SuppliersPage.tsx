@@ -1,3 +1,4 @@
+import { Check, Pencil, Plus, Trash2, UserCheck, UserX, X } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import {
@@ -114,6 +115,7 @@ export function SuppliersPage() {
       <div className="page-header">
         <h1>Suppliers</h1>
         <button className="btn" type="button" onClick={startCreate}>
+          <Plus className="icon" size={16} />
           Add Supplier
         </button>
       </div>
@@ -161,6 +163,7 @@ export function SuppliersPage() {
           {formError && <div className="error-text">{formError}</div>}
           <div className="form-actions">
             <button className="btn" type="submit" disabled={submitting}>
+              <Check className="icon" size={16} />
               {submitting ? 'Saving…' : 'Save'}
             </button>
             <button
@@ -169,6 +172,7 @@ export function SuppliersPage() {
               onClick={() => setFormOpen(false)}
               disabled={submitting}
             >
+              <X className="icon" size={16} />
               Cancel
             </button>
           </div>
@@ -204,6 +208,7 @@ export function SuppliersPage() {
                 </td>
                 <td>
                   <button className="btn btn-secondary" type="button" onClick={() => startEdit(supplier)}>
+                    <Pencil className="icon" size={14} />
                     Edit
                   </button>{' '}
                   {supplier.is_active ? (
@@ -212,6 +217,7 @@ export function SuppliersPage() {
                       type="button"
                       onClick={() => handleDeactivate(supplier)}
                     >
+                      <UserX className="icon" size={14} />
                       Deactivate
                     </button>
                   ) : (
@@ -220,10 +226,12 @@ export function SuppliersPage() {
                       type="button"
                       onClick={() => handleReactivate(supplier)}
                     >
+                      <UserCheck className="icon" size={14} />
                       Reactivate
                     </button>
                   )}{' '}
                   <button className="btn btn-danger" type="button" onClick={() => handleDelete(supplier)}>
+                    <Trash2 className="icon" size={14} />
                     Delete
                   </button>
                 </td>

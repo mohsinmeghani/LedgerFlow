@@ -1,3 +1,4 @@
+import { Check, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createPayment, deletePayment, listPayments } from '../api/payments'
@@ -138,6 +139,7 @@ export function PaymentsPage() {
       <div className="page-header">
         <h1>Payments</h1>
         <button className="btn" type="button" onClick={startCreate} disabled={suppliers.length === 0}>
+          <Plus className="icon" size={16} />
           Add Payment
         </button>
       </div>
@@ -266,6 +268,7 @@ export function PaymentsPage() {
           {formError && <div className="error-text">{formError}</div>}
           <div className="form-actions">
             <button className="btn" type="submit" disabled={submitting || overAllocated}>
+              <Check className="icon" size={16} />
               {submitting ? 'Saving…' : 'Save Payment'}
             </button>
             <button
@@ -274,6 +277,7 @@ export function PaymentsPage() {
               onClick={() => setFormOpen(false)}
               disabled={submitting}
             >
+              <X className="icon" size={16} />
               Cancel
             </button>
           </div>
@@ -307,6 +311,7 @@ export function PaymentsPage() {
                 <td>{payment.allocations.length} purchase(s)</td>
                 <td>
                   <button className="btn btn-danger" type="button" onClick={() => handleDelete(payment)}>
+                    <Trash2 className="icon" size={14} />
                     Delete
                   </button>
                 </td>

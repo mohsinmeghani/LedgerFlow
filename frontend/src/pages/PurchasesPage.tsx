@@ -1,3 +1,4 @@
+import { Check, Plus, Trash2, X } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { listItems } from '../api/items'
@@ -134,6 +135,7 @@ export function PurchasesPage() {
       <div className="page-header">
         <h1>Purchases</h1>
         <button className="btn" type="button" onClick={startCreate} disabled={suppliers.length === 0 || items.length === 0}>
+          <Plus className="icon" size={16} />
           Add Purchase
         </button>
       </div>
@@ -257,6 +259,7 @@ export function PurchasesPage() {
                         onClick={() => removeRow(row.key)}
                         disabled={rows.length === 1}
                       >
+                        <Trash2 className="icon" size={14} />
                         Remove
                       </button>
                     </td>
@@ -268,7 +271,8 @@ export function PurchasesPage() {
               <tr>
                 <td colSpan={3}>
                   <button className="btn btn-secondary" type="button" onClick={addRow}>
-                    + Add Line
+                    <Plus className="icon" size={14} />
+                    Add Line
                   </button>
                 </td>
                 <td className="text-right">
@@ -282,6 +286,7 @@ export function PurchasesPage() {
           {formError && <div className="error-text">{formError}</div>}
           <div className="form-actions">
             <button className="btn" type="submit" disabled={submitting}>
+              <Check className="icon" size={16} />
               {submitting ? 'Saving…' : 'Save Purchase'}
             </button>
             <button
@@ -290,6 +295,7 @@ export function PurchasesPage() {
               onClick={() => setFormOpen(false)}
               disabled={submitting}
             >
+              <X className="icon" size={16} />
               Cancel
             </button>
           </div>
@@ -329,6 +335,7 @@ export function PurchasesPage() {
                 </td>
                 <td>
                   <button className="btn btn-danger" type="button" onClick={() => handleDelete(purchase)}>
+                    <Trash2 className="icon" size={14} />
                     Delete
                   </button>
                 </td>

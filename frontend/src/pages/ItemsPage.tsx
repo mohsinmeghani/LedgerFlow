@@ -1,3 +1,4 @@
+import { Check, Pencil, Plus, Tags, Trash2, X } from 'lucide-react'
 import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createItem, deleteItem, listItems, updateItem, type ItemInput } from '../api/items'
@@ -142,9 +143,11 @@ export function ItemsPage() {
             type="button"
             onClick={() => setManageCategoriesOpen((open) => !open)}
           >
+            <Tags className="icon" size={16} />
             {manageCategoriesOpen ? 'Hide Categories' : 'Manage Categories'}
           </button>
           <button className="btn" type="button" onClick={startCreate}>
+            <Plus className="icon" size={16} />
             Add Item
           </button>
         </div>
@@ -170,6 +173,7 @@ export function ItemsPage() {
                       type="button"
                       onClick={() => handleDeleteCategory(category)}
                     >
+                      <Trash2 className="icon" size={14} />
                       Delete
                     </button>
                   </td>
@@ -242,6 +246,7 @@ export function ItemsPage() {
                     onClick={handleAddCategory}
                     disabled={categorySaving || !newCategoryName.trim()}
                   >
+                    <Check className="icon" size={14} />
                     {categorySaving ? 'Adding…' : 'Add'}
                   </button>
                   <button
@@ -254,6 +259,7 @@ export function ItemsPage() {
                     }}
                     disabled={categorySaving}
                   >
+                    <X className="icon" size={14} />
                     Cancel
                   </button>
                 </div>
@@ -264,6 +270,7 @@ export function ItemsPage() {
           {formError && <div className="error-text">{formError}</div>}
           <div className="form-actions">
             <button className="btn" type="submit" disabled={submitting}>
+              <Check className="icon" size={16} />
               {submitting ? 'Saving…' : 'Save'}
             </button>
             <button
@@ -272,6 +279,7 @@ export function ItemsPage() {
               onClick={() => setFormOpen(false)}
               disabled={submitting}
             >
+              <X className="icon" size={16} />
               Cancel
             </button>
           </div>
@@ -299,9 +307,11 @@ export function ItemsPage() {
                 <td>{(item.category_id && categoryNameById.get(item.category_id)) || '—'}</td>
                 <td>
                   <button className="btn btn-secondary" type="button" onClick={() => startEdit(item)}>
+                    <Pencil className="icon" size={14} />
                     Edit
                   </button>{' '}
                   <button className="btn btn-danger" type="button" onClick={() => handleDeleteItem(item)}>
+                    <Trash2 className="icon" size={14} />
                     Delete
                   </button>
                 </td>
