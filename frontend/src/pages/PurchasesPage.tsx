@@ -9,6 +9,7 @@ import {
   type PurchaseLineItemInput,
 } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
+import { useToast } from '../context/ToastContext'
 import type { Item, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney, statusLabel } from '../utils/format'
 
@@ -25,6 +26,7 @@ function today(): string {
 }
 
 export function PurchasesPage() {
+  const { showError } = useToast()
   const [purchases, setPurchases] = useState<PurchaseWithBalance[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [items, setItems] = useState<Item[]>([])
@@ -126,7 +128,7 @@ export function PurchasesPage() {
       await deletePurchase(purchase.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to delete purchase.'))
+      showError(getErrorMessage(error, 'Failed to delete purchase.'))
     }
   }
 

@@ -10,11 +10,13 @@ import {
   updateSupplier,
   type SupplierInput,
 } from '../api/suppliers'
+import { useToast } from '../context/ToastContext'
 import type { Supplier } from '../types'
 
 const EMPTY_FORM: SupplierInput = { name: '', contact: '', address: '' }
 
 export function SuppliersPage() {
+  const { showError } = useToast()
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -86,7 +88,7 @@ export function SuppliersPage() {
       await deactivateSupplier(supplier.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to deactivate supplier.'))
+      showError(getErrorMessage(error, 'Failed to deactivate supplier.'))
     }
   }
 
@@ -95,7 +97,7 @@ export function SuppliersPage() {
       await reactivateSupplier(supplier.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to reactivate supplier.'))
+      showError(getErrorMessage(error, 'Failed to reactivate supplier.'))
     }
   }
 
@@ -106,7 +108,7 @@ export function SuppliersPage() {
       await deleteSupplier(supplier.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to delete supplier.'))
+      showError(getErrorMessage(error, 'Failed to delete supplier.'))
     }
   }
 

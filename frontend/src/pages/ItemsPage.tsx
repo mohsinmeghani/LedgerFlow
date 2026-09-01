@@ -3,12 +3,14 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { getErrorMessage } from '../api/errors'
 import { createItem, deleteItem, listItems, updateItem, type ItemInput } from '../api/items'
 import { createItemCategory, deleteItemCategory, listItemCategories } from '../api/itemCategories'
+import { useToast } from '../context/ToastContext'
 import type { Item, ItemCategory } from '../types'
 
 const EMPTY_FORM: ItemInput = { name: '', unit: '', category_id: '' }
 const NEW_CATEGORY_VALUE = '__new__'
 
 export function ItemsPage() {
+  const { showError } = useToast()
   const [items, setItems] = useState<Item[]>([])
   const [categories, setCategories] = useState<ItemCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -99,7 +101,7 @@ export function ItemsPage() {
       await deleteItem(item.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to delete item.'))
+      showError(getErrorMessage(error, 'Failed to delete item.'))
     }
   }
 
@@ -109,7 +111,7 @@ export function ItemsPage() {
       await deleteItemCategory(category.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to delete category.'))
+      showError(getErrorMessage(error, 'Failed to delete category.'))
     }
   }
 

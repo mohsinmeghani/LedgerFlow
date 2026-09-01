@@ -4,6 +4,7 @@ import { getErrorMessage } from '../api/errors'
 import { createPayment, deletePayment, listPayments } from '../api/payments'
 import { listPurchases } from '../api/purchases'
 import { listSuppliers } from '../api/suppliers'
+import { useToast } from '../context/ToastContext'
 import type { Payment, PurchaseWithBalance, Supplier } from '../types'
 import { formatDate, formatMoney } from '../utils/format'
 
@@ -14,6 +15,7 @@ function today(): string {
 }
 
 export function PaymentsPage() {
+  const { showError } = useToast()
   const [payments, setPayments] = useState<Payment[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
   const [loading, setLoading] = useState(true)
@@ -130,7 +132,7 @@ export function PaymentsPage() {
       await deletePayment(payment.id)
       await load()
     } catch (error) {
-      window.alert(getErrorMessage(error, 'Failed to delete payment.'))
+      showError(getErrorMessage(error, 'Failed to delete payment.'))
     }
   }
 
