@@ -90,18 +90,45 @@ button {
 .nav-group {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-top: 0.75rem;
+  margin-top: 0.25rem;
 }
 
-.nav-group-label {
-  color: rgba(255, 255, 255, 0.45);
+.nav-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-family: inherit;
+}
+
+.nav-group-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.nav-group-chevron {
+  display: inline-block;
   font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0 0.75rem;
-  margin-bottom: 0.15rem;
+  transition: transform 0.15s ease;
+}
+
+.nav-group-toggle.open .nav-group-chevron {
+  transform: rotate(90deg);
+}
+
+.nav-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-left: 0.75rem;
+  margin-top: 0.15rem;
 }
 
 .logout-button {
