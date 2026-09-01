@@ -1,13 +1,27 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-const navItems = [
-  { to: '/', label: 'Dashboard', end: true },
-  { to: '/suppliers', label: 'Suppliers' },
-  { to: '/items', label: 'Items' },
-  { to: '/purchases', label: 'Purchases' },
-  { to: '/payments', label: 'Payments' },
-  { to: '/ledger', label: 'Ledger' },
+const rootItem = { to: '/', label: 'Dashboard', end: true }
+
+const navGroups: { label: string; items: { to: string; label: string }[] }[] = [
+  {
+    label: 'Masters',
+    items: [
+      { to: '/suppliers', label: 'Suppliers' },
+      { to: '/items', label: 'Items' },
+    ],
+  },
+  {
+    label: 'Transactions',
+    items: [
+      { to: '/purchases', label: 'Purchases' },
+      { to: '/payments', label: 'Payments' },
+    ],
+  },
+  {
+    label: 'Reports',
+    items: [{ to: '/ledger', label: 'Ledger' }],
+  },
 ]
 
 export function Layout() {
@@ -18,15 +32,27 @@ export function Layout() {
       <aside className="sidebar">
         <div className="brand">LedgerFlow</div>
         <nav>
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
-            >
-              {item.label}
-            </NavLink>
+          <NavLink
+            to={rootItem.to}
+            end={rootItem.end}
+            className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+          >
+            {rootItem.label}
+          </NavLink>
+
+          {navGroups.map((group) => (
+            <div className="nav-group" key={group.label}>
+              <div className="nav-group-label">{group.label}</div>
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
         <button className="logout-button" onClick={logout} type="button">

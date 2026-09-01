@@ -87,6 +87,23 @@ button {
   font-weight: 600;
 }
 
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.75rem;
+}
+
+.nav-group-label {
+  color: rgba(255, 255, 255, 0.45);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0 0.75rem;
+  margin-bottom: 0.15rem;
+}
+
 .logout-button {
   margin-top: 1rem;
   background: transparent;
